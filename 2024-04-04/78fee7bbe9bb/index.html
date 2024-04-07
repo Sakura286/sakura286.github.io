@@ -28,7 +28,7 @@
 <meta property="og:description" content="目标手里有几个包，想搭建一个 apt 仓库，对应发行版为 Debian unstable riscv64 思路这里的 server 指的是提供 apt 仓库服务的机器，client 指的是要访问 apt 仓库的机器  (server) 为本机生成 GPG 公钥与私钥 (server) 使用 aptly 添加包，并生成仓库的 snapshot (server) 使用 nginx 搭建私有的服务器，存">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-04-04T08:27:50.000Z">
-<meta property="article:modified_time" content="2024-04-04T09:20:20.638Z">
+<meta property="article:modified_time" content="2024-04-07T09:27:46.217Z">
 <meta property="article:author" content="Sakura286">
 <meta name="twitter:card" content="summary">
 
@@ -173,10 +173,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-04-04 16:27:50 / 修改时间：17:20:20" itemprop="dateCreated datePublished" datetime="2024-04-04T16:27:50+08:00">2024-04-04</time>
+              <time title="创建时间：2024-04-04 16:27:50" itemprop="dateCreated datePublished" datetime="2024-04-04T16:27:50+08:00">2024-04-04</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-07 17:27:46" itemprop="dateModified" datetime="2024-04-07T17:27:46+08:00">2024-04-07</time>
+              </span>
 
           
 
@@ -199,7 +205,8 @@
 </ol>
 <h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><h3 id="1-生成-gpg-key"><a href="#1-生成-gpg-key" class="headerlink" title="1. 生成 gpg-key"></a>1. 生成 gpg-key</h3><h4 id="生成签名用的-GPG-KEY"><a href="#生成签名用的-GPG-KEY" class="headerlink" title="生成签名用的 GPG KEY"></a>生成签名用的 GPG KEY</h4><p>运行命令: <code>gpg --full-gen-key</code>，按照提示操作。</p>
 <p><code>~/.gnupg/openpgp-revocs.d/</code>目录下生成<code>.rev</code>的 key 文件</p>
-<h4 id="生成-ASCII-格式的公钥"><a href="#生成-ASCII-格式的公钥" class="headerlink" title="生成 ASCII 格式的公钥"></a>生成 ASCII 格式的公钥</h4><p><code>gpg --output &lt;key_filename&gt; --armor &lt;your_email&gt;</code></p>
+<h4 id="生成-ASCII-格式的公钥"><a href="#生成-ASCII-格式的公钥" class="headerlink" title="生成 ASCII 格式的公钥"></a>生成 ASCII 格式的公钥</h4><p><code>gpg --output &lt;key_filename&gt; --armor --export &lt;your_email&gt;</code></p>
+<p>请确保<code>&lt;your_email&gt;</code>与生成私钥时所用的邮箱相同</p>
 <h3 id="2-使用-aptly-添加包，并生成仓库的-snapshot"><a href="#2-使用-aptly-添加包，并生成仓库的-snapshot" class="headerlink" title="2. 使用 aptly 添加包，并生成仓库的 snapshot"></a>2. 使用 aptly 添加包，并生成仓库的 snapshot</h3><p>安装 aptly 后，创建仓库，本步骤执行后将生成<code>~/.aptly</code>目录</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 请拓展尖括号的内容, 例如，我这边拓展后是这样的</span></span><br><span class="line"><span class="comment"># aptly repo create -architectures riscv64 -comment &#x27;private riscv64 repo&#x27; -component main -distribution unstable my_repo</span></span><br><span class="line">aptly repo create -architectures &lt;<span class="built_in">arch</span>&gt; -comment &lt;your_comment&gt; -component &lt;component&gt; -distribution &lt;distrubution&gt; &lt;repo_name&gt;</span><br></pre></td></tr></table></figure>
 
@@ -229,6 +236,7 @@
 <li><a target="_blank" rel="noopener" href="https://www.aftermath.cn/2023/06/03/aptly-usage/">aptly搭建本地仓库 - vimer</a></li>
 <li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44979075/article/details/124747355">动手搭建一个私有的apt服务器 - csdn</a></li>
 <li><a target="_blank" rel="noopener" href="https://talk.quwj.com/topic/1897">手动自建 APT 仓库步骤 - 趣小组</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.github.com/zh/authentication/managing-commit-signature-verification/generating-a-new-gpg-key">生成新 GPG 密钥</a></li>
 </ul>
 
     </div>
