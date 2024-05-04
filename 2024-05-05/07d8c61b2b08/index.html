@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sakura286.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文的目的是通过计算一个 ELF 文件各部分的大小来认识 ELF 文件的组成。 基础知识 ELF 文件的主要部分，  从链接器的视角来看由section组成，每个section的信息记录在 ELF 文件尾部的section header table部分 从加载器的视角（即执行视角）来看由segment组成，每个segment的信息记录在 ELF 文件头部的program header table部">
+<meta property="og:type" content="article">
+<meta property="og:title" content="认识 ELF（一）">
+<meta property="og:url" content="https://sakura286.github.io/2024-05-05/07d8c61b2b08/index.html">
+<meta property="og:site_name" content="你无法体验苹果本身">
+<meta property="og:description" content="本文的目的是通过计算一个 ELF 文件各部分的大小来认识 ELF 文件的组成。 基础知识 ELF 文件的主要部分，  从链接器的视角来看由section组成，每个section的信息记录在 ELF 文件尾部的section header table部分 从加载器的视角（即执行视角）来看由segment组成，每个segment的信息记录在 ELF 文件头部的program header table部">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sakura286.github.io/images/2802c1b8-a901-430c-87d1-3f8b4a481953.png">
+<meta property="article:published_time" content="2024-05-04T16:01:55.000Z">
+<meta property="article:modified_time" content="2024-05-04T17:06:09.397Z">
+<meta property="article:author" content="Sakura286">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://sakura286.github.io/images/2802c1b8-a901-430c-87d1-3f8b4a481953.png">
+
+<link rel="canonical" href="https://sakura286.github.io/2024-05-05/07d8c61b2b08/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>认识 ELF（一） | 你无法体验苹果本身</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">你无法体验苹果本身</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">人为自然立法</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sakura286.github.io/2024-05-05/07d8c61b2b08/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Sakura286">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="你无法体验苹果本身">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          认识 ELF（一）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-05-05 00:01:55 / 修改时间：01:06:09" itemprop="dateCreated datePublished" datetime="2024-05-05T00:01:55+08:00">2024-05-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文的目的是通过计算一个 ELF 文件各部分的<strong>大小</strong>来认识 ELF 文件的组成。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><p><img src="/../images/2802c1b8-a901-430c-87d1-3f8b4a481953.png" alt="链接器的两种视角"></p>
+<p>ELF 文件的主要部分，</p>
+<ul>
+<li>从链接器的视角来看由<code>section</code>组成，每个<code>section</code>的信息记录在 ELF 文件尾部的<code>section header table</code>部分</li>
+<li>从加载器的视角（即执行视角）来看由<code>segment</code>组成，每个<code>segment</code>的信息记录在 ELF 文件头部的<code>program header table</code>部分</li>
+</ul>
+<h2 id="ELF-文件大小计算"><a href="#ELF-文件大小计算" class="headerlink" title="ELF 文件大小计算"></a>ELF 文件大小计算</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>gcc -o test test.c</code>编译上面的 c 文件，并用<code>ls -l</code>查看文件的大小（在作者的电脑上是 15832 字节）</p>
+<p>使用<code>readelf -h test</code>可得知 ELF header 的相关信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 </span><br><span class="line">  Class:                             ELF64</span><br><span class="line">  Data:                              2&#x27;s complement, little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              DYN (Position-Independent Executable file)</span><br><span class="line">  Machine:                           Advanced Micro Devices X86-64</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x1040</span><br><span class="line">  Start of program headers:          64 (bytes into file)</span><br><span class="line">  Start of section headers:          13912 (bytes into file)</span><br><span class="line">  Flags:                             0x0</span><br><span class="line">  Size of this header:               64 (bytes)</span><br><span class="line">  Size of program headers:           56 (bytes)</span><br><span class="line">  Number of program headers:         13</span><br><span class="line">  Size of section headers:           64 (bytes)</span><br><span class="line">  Number of section headers:         30</span><br><span class="line">  Section header string table index: 29</span><br></pre></td></tr></table></figure>
+
+<p>本文只关注<strong>大小</strong>，由<code>Size of this header</code>可以得知<code>ELF header</code>的大小是 64 字节</p>
+<p>program header table 应该紧随 ELF header 之后，那么其相对于 ELF 文件起始处的偏移应该也是 64 字节，<code>Start of program headers</code>一项可以验证此结论</p>
+<p>program header table 里存放了多条 program header，每条 program header 都存放着每个<code>segment</code>的元数据。在本例中，由<code>Size of program headers</code>与<code>Number of program headers</code>可知 program header table 一共有 13 条，每一条的大小是 56 字节。即整个表的大小为 13 * 56 &#x3D; 728 字节。</p>
+<p><code>sections</code>部分，或<code>segments</code>部分，应当紧随 program header table 之后，所以推测其起始偏移应该是 64 + 728 &#x3D; 792 字节处</p>
+<p>使用<code>readelf -S -W test</code>命令，获得如下内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">Section Headers:</span><br><span class="line">  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al</span><br><span class="line">  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0</span><br><span class="line">  [ 1] .interp           PROGBITS        0000000000000318 000318 00001c 00   A  0   0  1</span><br><span class="line">  [ 2] .note.gnu.property NOTE           0000000000000338 000338 000020 00   A  0   0  8</span><br><span class="line">  [ 3] .note.gnu.build-id NOTE           0000000000000358 000358 000024 00   A  0   0  4</span><br><span class="line">  [ 4] .note.ABI-tag     NOTE            000000000000037c 00037c 000020 00   A  0   0  4</span><br><span class="line">  [ 5] .gnu.hash         GNU_HASH        00000000000003a0 0003a0 000024 00   A  6   0  8</span><br><span class="line">  [ 6] .dynsym           DYNSYM          00000000000003c8 0003c8 000090 18   A  7   1  8</span><br><span class="line">  [ 7] .dynstr           STRTAB          0000000000000458 000458 000088 00   A  0   0  1</span><br><span class="line">  [ 8] .gnu.version      VERSYM          00000000000004e0 0004e0 00000c 02   A  6   0  2</span><br><span class="line">  [ 9] .gnu.version_r    VERNEED         00000000000004f0 0004f0 000030 00   A  7   1  8</span><br><span class="line">  [10] .rela.dyn         RELA            0000000000000520 000520 0000c0 18   A  6   0  8</span><br><span class="line">  [11] .init             PROGBITS        0000000000001000 001000 000017 00  AX  0   0  4</span><br><span class="line">  [12] .plt              PROGBITS        0000000000001020 001020 000010 10  AX  0   0 16</span><br><span class="line">  [13] .plt.got          PROGBITS        0000000000001030 001030 000008 08  AX  0   0  8</span><br><span class="line">  [14] .text             PROGBITS        0000000000001040 001040 0000f4 00  AX  0   0 16</span><br><span class="line">  [15] .fini             PROGBITS        0000000000001134 001134 000009 00  AX  0   0  4</span><br><span class="line">  [16] .rodata           PROGBITS        0000000000002000 002000 000004 04  AM  0   0  4</span><br><span class="line">  [17] .eh_frame_hdr     PROGBITS        0000000000002004 002004 00002c 00   A  0   0  4</span><br><span class="line">  [18] .eh_frame         PROGBITS        0000000000002030 002030 0000ac 00   A  0   0  8</span><br><span class="line">  [19] .init_array       INIT_ARRAY      0000000000003e00 002e00 000008 08  WA  0   0  8</span><br><span class="line">  [20] .fini_array       FINI_ARRAY      0000000000003e08 002e08 000008 08  WA  0   0  8</span><br><span class="line">  [21] .dynamic          DYNAMIC         0000000000003e10 002e10 0001b0 10  WA  7   0  8</span><br><span class="line">  [22] .got              PROGBITS        0000000000003fc0 002fc0 000028 08  WA  0   0  8</span><br><span class="line">  [23] .got.plt          PROGBITS        0000000000003fe8 002fe8 000018 08  WA  0   0  8</span><br><span class="line">  [24] .data             PROGBITS        0000000000004000 003000 000010 00  WA  0   0  8</span><br><span class="line">  [25] .bss              NOBITS          0000000000004010 003010 000008 00  WA  0   0  1</span><br><span class="line">  [26] .comment          PROGBITS        0000000000000000 003010 00001f 01  MS  0   0  1</span><br><span class="line">  [27] .symtab           SYMTAB          0000000000000000 003030 000348 18     28  18  8</span><br><span class="line">  [28] .strtab           STRTAB          0000000000000000 003378 0001c9 00      0   0  1</span><br><span class="line">  [29] .shstrtab         STRTAB          0000000000000000 003541 000110 00      0   0  1</span><br></pre></td></tr></table></figure>
+
+<p>重点看 Off(set) 与 Size 两列。offset 是该 section 相对于整个 ELF 文件起始的偏移，第一个有实质内容的 section 是<code>.interp</code>，其起始偏移为 0x318，正好对应前文的 792 字节。</p>
+<p>随后，看最后的 section <code>.shstrtab</code>，其起始偏移为 0x3541，大小为 0x110，即所有 sections 的结束偏移为 0x3541 + 0x110 &#x3D; 0x3651，即 13905 字节。</p>
+<p>section header table 应当紧随 sections 之后，即其起始偏移为 13905 字节。由<code>Number of section headers</code>与<code>Size of section headers</code>可知，表中有 30 条 section header，每条的大小是 64 字节，所以表的大小是 30 * 64 &#x3D; 1920 字节。那么整个文件的大小为 13905 + 1920 &#x3D; 15825 字节。</p>
+<p>我们验证一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">du</span> -b <span class="built_in">test</span></span><br><span class="line">15832   <span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+
+<p>咦，实际的大小是 15832 字节。问题在于 ELF 文件的每一部分都是 8 字节对齐的（<strong>TODO</strong>：在哪定的？），所以，虽然 sections 的结束偏移为 13905 字节，但 section header table 应当对齐 8 字节，即应当从 13912 偏移处开始，从 ELF header 中的<code>Start of section headers</code>可以验证此结论。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/363488456">elf 文件格式 -1- 可执行文件 - 黄导 - 知乎</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024-04-29/85cbfb3b3ad1/" rel="prev" title="su 与 sudo 的环境变量问题">
+      <i class="fa fa-chevron-left"></i> su 与 sudo 的环境变量问题
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">基础知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ELF-%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F%E8%AE%A1%E7%AE%97"><span class="nav-number">2.</span> <span class="nav-text">ELF 文件大小计算</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Sakura286</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sakura286</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
