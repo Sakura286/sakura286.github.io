@@ -28,7 +28,7 @@
 <meta property="og:description" content="目标手里有几个包，想搭建一个 apt 仓库，对应发行版为 Debian unstable riscv64 思路这里的 server 指的是提供 apt 仓库服务的机器，client 指的是要访问 apt 仓库的机器  (server) 为本机生成 GPG 公钥与私钥 (server) 使用 aptly 添加包，并生成仓库的 snapshot (server) 使用 nginx 搭建私有的服务器，存">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-04-04T08:27:50.000Z">
-<meta property="article:modified_time" content="2024-04-07T13:32:18.477Z">
+<meta property="article:modified_time" content="2024-05-27T16:06:55.580Z">
 <meta property="article:author" content="Sakura286">
 <meta name="twitter:card" content="summary">
 
@@ -181,7 +181,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-07 21:32:18" itemprop="dateModified" datetime="2024-04-07T21:32:18+08:00">2024-04-07</time>
+                <time title="修改时间：2024-05-28 00:06:55" itemprop="dateModified" datetime="2024-05-28T00:06:55+08:00">2024-05-28</time>
               </span>
 
           
@@ -203,9 +203,9 @@
 <li>(server) 使用 nginx 搭建私有的服务器，存放生成的 snapshot</li>
 <li>(client) 添加公钥，修改 apt 配置</li>
 </ol>
-<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><h3 id="1-生成-gpg-key"><a href="#1-生成-gpg-key" class="headerlink" title="1. 生成 gpg-key"></a>1. 生成 gpg-key</h3><h4 id="生成签名用的-GPG-KEY"><a href="#生成签名用的-GPG-KEY" class="headerlink" title="生成签名用的 GPG KEY"></a>生成签名用的 GPG KEY</h4><p>运行命令: <code>gpg --full-gen-key</code>，按照提示操作。</p>
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><h3 id="1-生成-gpg-key"><a href="#1-生成-gpg-key" class="headerlink" title="1. 生成 gpg-key"></a>1. 生成 gpg-key</h3><h4 id="生成签名用的-GPG-KEY"><a href="#生成签名用的-GPG-KEY" class="headerlink" title="生成签名用的 GPG KEY"></a>生成签名用的 GPG KEY</h4><p>运行命令：<code>gpg --full-gen-key</code>，按照提示操作。</p>
 <p><code>~/.gnupg/openpgp-revocs.d/</code>目录下生成<code>.rev</code>的 key 文件</p>
-<h4 id="生成-ASCII-格式的公钥"><a href="#生成-ASCII-格式的公钥" class="headerlink" title="生成 ASCII 格式的公钥"></a>生成 ASCII 格式的公钥</h4><p><code>gpg --output &lt;key_filename&gt; --armor --export &lt;your_email&gt;</code></p>
+<h4 id="生成-ASCII-格式的公钥"><a href="#生成-ASCII-格式的公钥" class="headerlink" title="生成 ASCII 格式的公钥"></a>生成 ASCII 格式的公钥</h4><p><code>gpg --output &lt;key_filename&gt; --export &lt;your_email&gt;</code></p>
 <p>请确保<code>&lt;your_email&gt;</code>与生成私钥时所用的邮箱相同</p>
 <h3 id="2-使用-aptly-添加包，并生成仓库的-snapshot"><a href="#2-使用-aptly-添加包，并生成仓库的-snapshot" class="headerlink" title="2. 使用 aptly 添加包，并生成仓库的 snapshot"></a>2. 使用 aptly 添加包，并生成仓库的 snapshot</h3><p>安装 aptly 后，创建仓库，本步骤执行后将生成<code>~/.aptly</code>目录</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 请拓展尖括号的内容, 例如，我这边拓展后是这样的</span></span><br><span class="line"><span class="comment"># aptly repo create -architectures riscv64 -comment &#x27;private riscv64 repo&#x27; -component main -distribution unstable my_repo</span></span><br><span class="line">aptly repo create -architectures &lt;<span class="built_in">arch</span>&gt; -comment &lt;your_comment&gt; -component &lt;component&gt; -distribution &lt;distrubution&gt; &lt;repo_name&gt;</span><br></pre></td></tr></table></figure>
@@ -218,10 +218,10 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">aptly snapshot create &lt;snapshot_name&gt; from repo &lt;repo_name&gt;</span><br><span class="line">aptly publish -architectures &lt;<span class="built_in">arch</span>&gt; snapshot &lt;snapshot_name&gt;</span><br></pre></td></tr></table></figure>
 
 <h3 id="3-搭建服务器"><a href="#3-搭建服务器" class="headerlink" title="3. 搭建服务器"></a>3. 搭建服务器</h3><p>使用 nginx 搭建文件服务器，使得外部网络可以访问仓库内容</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nginx -y</span><br><span class="line"><span class="comment"># 在 root /var/www/html； 一行下面添加下面一行</span></span><br><span class="line"><span class="comment"># autoindex on;</span></span><br><span class="line"><span class="comment"># 注意保留分号</span></span><br><span class="line">sudo vim /etc/nginx/sites-enabled/default</span><br><span class="line">sudo systemctl restart nginx.service</span><br><span class="line"><span class="comment"># 将发布后的 snapshot 仓库移动到服务器目录</span></span><br><span class="line">sudo <span class="built_in">cp</span> -r ~/.aptly/public/ /var/www/html/public</span><br><span class="line"><span class="comment"># 别忘了用浏览器访问一下</span></span><br><span class="line"><span class="comment"># http://&lt;ip_address&gt;/public</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nginx -y</span><br><span class="line"><span class="comment"># 修改 root /var/www/html; 为目标目录</span></span><br><span class="line"><span class="comment"># 并在添加下面一行</span></span><br><span class="line"><span class="comment"># autoindex on;</span></span><br><span class="line">sudo vim /etc/nginx/sites-enabled/default</span><br><span class="line"></span><br><span class="line">sudo systemctl restart nginx.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 别忘了用浏览器访问一下</span></span><br><span class="line"><span class="comment"># http://&lt;ip_address&gt;/public</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="4-在-client-端访问-apt-仓库"><a href="#4-在-client-端访问-apt-仓库" class="headerlink" title="4. 在 client 端访问 apt 仓库"></a>4. 在 client 端访问 apt 仓库</h3><p>注意，服务器我们已经搭建好了，接下来的操作在客户端上进行</p>
-<p>将前文中的公钥添加至本机配置，<strong>TODO：这种方法已行将废弃，需要找到更行之有效的方法</strong></p>
+<p>将前文中的公钥添加至本机配置，<strong>TODO：使用 DEB-822 格式，添加</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-key add &lt;key_filename&gt;</span><br></pre></td></tr></table></figure>
 
 <p>在 apt 配置中写入如下一行</p>
@@ -233,8 +233,8 @@
 <li>需要对 gpg 签名的原理进行进一步的解释</li>
 </ol>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://www.aftermath.cn/2023/06/03/aptly-usage/">aptly搭建本地仓库 - vimer</a></li>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44979075/article/details/124747355">动手搭建一个私有的apt服务器 - csdn</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.aftermath.cn/2023/06/03/aptly-usage/">aptly 搭建本地仓库 - vimer</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44979075/article/details/124747355">动手搭建一个私有的 apt 服务器 - csdn</a></li>
 <li><a target="_blank" rel="noopener" href="https://talk.quwj.com/topic/1897">手动自建 APT 仓库步骤 - 趣小组</a></li>
 <li><a target="_blank" rel="noopener" href="https://docs.github.com/zh/authentication/managing-commit-signature-verification/generating-a-new-gpg-key">生成新 GPG 密钥 - GitHub</a></li>
 </ul>
