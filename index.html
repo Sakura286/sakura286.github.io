@@ -265,7 +265,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-27 23:53:07" itemprop="dateModified" datetime="2024-05-27T23:53:07+08:00">2024-05-27</time>
+                <time title="修改时间：2024-05-28 00:41:11" itemprop="dateModified" datetime="2024-05-28T00:41:11+08:00">2024-05-28</time>
               </span>
 
           
@@ -279,7 +279,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <p>#!&#x2F;bin&#x2F;bash</p>
+<p>set -x</p>
+<p>REPO&#x3D;”yahboom-car-revyos”</p>
+<p>aptly publish drop bullseye .<br>aptly repo add $REPO $(ls | grep -E “.deb$” | tr “\n” “ “) $(ls | grep -E “revyos[0-9].dsc$” | tr “\n” “ “)</p>
+<p>SNAPSHOT&#x3D;$(date “+%m%d_%M%S”)<br>aptly snapshot create $SNAPSHOT from repo $REPO<br>aptly publish snapshot $SNAPSHOT</p>
+
       
     </div>
 
