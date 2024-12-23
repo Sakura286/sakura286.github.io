@@ -6,7 +6,7 @@
   <link href="https://sakura286.github.io/atom.xml" rel="self"/>
   
   <link href="https://sakura286.github.io/"/>
-  <updated>2024-12-20T08:35:46.506Z</updated>
+  <updated>2024-12-20T09:29:41.231Z</updated>
   <id>https://sakura286.github.io/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>LibreOffice 对自定义图形的处理</title>
+    <link href="https://sakura286.github.io/2024-12-20/3f2e33e3d329/"/>
+    <id>https://sakura286.github.io/2024-12-20/3f2e33e3d329/</id>
+    <published>2024-12-20T09:02:30.000Z</published>
+    <updated>2024-12-20T09:29:41.231Z</updated>
+    
+    <content type="html"><![CDATA[<p>事情的起因是修一个bug[^2]，需要折腾一下自定义图形，但几乎没有见到相关中文资料，英文资料也比较晦涩，所以想开个帖子讲得浅显易懂一点</p><p>结构1：自定义图形总括</p><p>所谓自定义图形（Custom Shape），就是打开 LibreOffice writer&#x2F;impress，选择<code>Insert</code>-&gt;<code>Shape</code>后出现的那些矢量图形。矢量图是由点和线构成的，其中“线”是一种点与点之间的关系。考虑一个三角形<br><canvas id="tutorial" width="150" height="150"></canvas></p><p>结构2：基本语法</p><p>结构3：LibreOffice 语法</p><p>结构4：实例</p><p>[^2]: ceui <a href="https://bugs.documentfoundation.org/show_bug.cgi?id=148631">https://bugs.documentfoundation.org/show_bug.cgi?id=148631</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;事情的起因是修一个bug[^2]，需要折腾一下自定义图形，但几乎没有见到相关中文资料，英文资料也比较晦涩，所以想开个帖子讲得浅显易懂一点&lt;/p&gt;
+&lt;p&gt;结构1：自定义图形总括&lt;/p&gt;
+&lt;p&gt;所谓自定义图形（Custom Shape），就是打开 LibreOffice wri</summary>
+      
+    
+    
+    
+    
+    <category term="LibreOffice, UI, development" scheme="https://sakura286.github.io/tags/LibreOffice-UI-development/"/>
+    
+  </entry>
   
   <entry>
     <title>认识 ELF（一）</title>
