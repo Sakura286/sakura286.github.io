@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="zh-CN" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ROCm Debian 支持现状 | 你无法体验苹果本身</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="preload" as="font" crossorigin="anonymous" href="/font/Bender.ttf"><link rel="preload" as="font" crossorigin="anonymous" href="/font/BenderLight.ttf"><link rel="preload" as="font" crossorigin="anonymous" href="/font/JetBrainsMono-Regular.woff2"><link rel="stylesheet" href="/css/arknights.css"><style>@font-face {
+  font-family: Bender;
+  src: local('Bender'), url("/font/Bender.ttf"), url("/font/Bender.otf");
+}
+@font-face {
+  font-family: BenderLight;
+  src: local('BenderLight'), url("/font/BenderLight.ttf");
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}
+</style><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"Enter here","blurHolder":"Search","noResult":"Data \"$0\" not found"},"code":{"codeInfo":"$0 - $1 lines","copy":"copy"}}</script><link type="text/css" rel="stylesheet" href="/lib/encrypt/hbe.style.css"><script src="//unpkg.com/mermaid@10.5.0/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><script>if (window.localStorage.getItem('theme-mode') === 'light')
+ document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark')
+ document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.woff2") format('woff2');
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+ --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+ --light-background: url('/img/bk.jpg');
+ --theme-encrypt-confirm: 'confirm'
+}</style><script defer src="/js/arknights.js"></script><script defer src="/js/search.js"></script><script defer type="module">import mermaid from '//unpkg.com/mermaid@10.5.0/dist/mermaid.esm.mjs';
+window.mermaid = mermaid;
+code.paintMermaid();
+</script><script async src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script async src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script async src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script async src="/lib/encrypt/hbe.js"></script><script async src="/js/pjax.js"></script><script class="pjax-js">reset= () => {document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js','data-pjax','.busuanzi'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script><script class="pjax-js">reset= () => {document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="你无法体验苹果本身" type="application/atom+xml">
+</head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><nav><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="Search" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup" tabindex="0"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li></ol></nav></header><article><div id="post-bg"><div id="post-title"><h1>ROCm Debian 支持现状</h1><div id="post-info"><span>First Post: <div class="control"><time datetime="2025-07-31T15:15:50.000Z" id="date"> 2025-07-31</time></div></span><br><span>Last Update: <div class="control"><time datetime="2025-09-18T02:39:42.288Z" id="updated"> 2025-09-18</time></div></span></div></div><hr><div id="post-content"><p>本调查于 2025 年 7 月 31 日</p>
+<p>今天在 RISC-V 平台上基于 ROCm 6.4.2 后端，把 Deepseek 70B Q4 跑通了，而且很流畅，有点小高兴。</p>
+<p>可行性验证了，是时候考虑上游化的事情了。</p>
+<p>想从下面几个方面着手调查</p>
+<ol>
+<li>Debian ROCm 的版本</li>
+<li>Debian ROCm 组的活跃情况</li>
+<li>Debian ROCm 对其他架构的支持情况</li>
+</ol>
+<h2 id="基础信息"><a href="#基础信息" class="headerlink" title="基础信息"></a>基础信息</h2><p>ROCm Team 介绍 <a target="_blank" rel="noopener" href="https://wiki.debian.org/Teams/ROCm">https://wiki.debian.org/Teams/ROCm</a><br>源码仓库 <a target="_blank" rel="noopener" href="https://salsa.debian.org/rocm-team">https://salsa.debian.org/rocm-team</a><br>邮件列表 <a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/">https://lists.debian.org/debian-ai/</a></p>
+<h2 id="1-版本"><a href="#1-版本" class="headerlink" title="1. 版本"></a>1. 版本</h2><p>以 llama.cpp 所依赖的最高层级的包 hipblas 开始捋，根据<a target="_blank" rel="noopener" href="https://qa.debian.org/developer.php?email=debian-ai@lists.debian.org">Packages overview for Debian ROCm Team</a></p>
+<p>hipblas     5.5.1<br>rocsolver   5.5.1<br>rocblas     5.5.1 (experimental: 6.4.1)<br>rocsparse   5.7,1 (experimental: 6.4.1)<br>rocprim     5.7.1 (experimental: 6.4.1)<br>roctracer   5.7.1 (experimental: 6.4.1)</p>
+<p>smi-lib     5.7.1 (experimental: 6.4.1)<br>rocm-hipamd 5.7.1 (experimental: 6.1.5)<br>rocminfo    6.1.2 (experimental: 6.4.1)<br>rocm-llvm   n&#x2F;a   (experimental: 6.1.2)</p>
+<p>附：上游的<br>5.5.1 在 2023.05 发布<br>5.7.1 在 2023.10 发布<br>6.1.2 在 2024.07 发布<br>6.4.1 在 2025.05 发布</p>
+<p>可以看出，除了工具链&#x2F;HIP库略老（6.1.2）之外，重要的数学库已经在 experimental 里更新到了最新的 6.4.1</p>
+<p>或许可以看看 rocm-llvm 与 rocm-hipamd 的更新情况，以及一些不关键的包的升级情况</p>
+<h2 id="2-ROCm-社区活跃情况"><a href="#2-ROCm-社区活跃情况" class="headerlink" title="2. ROCm 社区活跃情况"></a>2. ROCm 社区活跃情况</h2><p>目前有两位活跃的维护者<a target="_blank" rel="noopener" href="https://salsa.debian.org/cgmb">Cordell Bloor</a>与<a target="_blank" rel="noopener" href="https://salsa.debian.org/ckk">Christian Kastner</a></p>
+<p>最近（三个月内）有其他的代码贡献者，例如<a target="_blank" rel="noopener" href="https://salsa.debian.org/kenhys">Kentaro Hayashi</a>，<a target="_blank" rel="noopener" href="https://salsa.debian.org/ajqlee">Andrew Lee (李健秋) </a>，<a target="_blank" rel="noopener" href="https://salsa.debian.org/bayle">Christian Bayle</a>，<a target="_blank" rel="noopener" href="https://salsa.debian.org/kapouer">Jérémy Lal</a>‘。邮件列表里活跃的还有 M. Zhou，</p>
+<p>最近两个月，Cordell Bloor 开始<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2025/05/msg00113.html">搞双周会</a>，但是最近因为他<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2025/07/msg00052.html">休假</a>，所以跳过了一次。目前双周会的链接并未公开，需要给 Bloor 发邮件去要，地址<code>cgmb@slerp.xyz</code></p>
+<h2 id="3-对其他架构的支持"><a href="#3-对其他架构的支持" class="headerlink" title="3. 对其他架构的支持"></a>3. 对其他架构的支持</h2><p>AMD 上游并未提到对特定 CPU 架构的需求，只需该 CPU 支持 PCIe atomic 即可</p>
+<p>Debian 这边支持 amd64 arm64 ppc64el</p>
+<p>2024.12，Cordell Bloor 看到 <a target="_blank" rel="noopener" href="https://www.phoronix.com/news/AMDKFD-Compute-POWERPC">POWER 系统支持 ROCm</a>，打算<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2024/12/msg00026.html">搞 arm64 和 ppc64</a></p>
+<p>2025.02，Raptor Computing 给 Debian ROCm 组<a href="(https://lists.debian.org/debian-ai/2025/02/msg00250.html)">提供了一台 ppc64 机器</a>，但是驱动有bug；有人建议<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2025/02/msg00251.html">用树莓派5来做 arm64 的验证</a></p>
+<p>2025.04，</p>
+<p>2025.05</p>
+<p>2025.06</p>
+<p>2025.07</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2025-09-17/9f72b4ef6e03/">← Next Debian 打包脚本预处理</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2025-06-13/a9cedd872168/">十万个为什么 Prev →</a></div></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="To Top" style="opacity: 0; display: none;">∧ </a><a class="i-index" id="to-index" href="#toc-div" title="To Catalog">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="Change Theme"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo" style="margin:0;border-radius:0;"></a><h1 id="Dr"><a href="/">Sakura286</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>Catalog</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E4%BF%A1%E6%81%AF"><span class="toc-number">1.</span> <span class="toc-text">基础信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%89%88%E6%9C%AC"><span class="toc-number">2.</span> <span class="toc-text">1. 版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-ROCm-%E7%A4%BE%E5%8C%BA%E6%B4%BB%E8%B7%83%E6%83%85%E5%86%B5"><span class="toc-number">3.</span> <span class="toc-text">2. ROCm 社区活跃情况</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AF%B9%E5%85%B6%E4%BB%96%E6%9E%B6%E6%9E%84%E7%9A%84%E6%94%AF%E6%8C%81"><span class="toc-number">4.</span> <span class="toc-text">3. 对其他架构的支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">5.</span> <span class="toc-text">结论</span></a></li></ol></div></div><footer><nobr>Published with <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> Theme <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr> by <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside></main><canvas id="canvas-dust"></canvas></body></html>

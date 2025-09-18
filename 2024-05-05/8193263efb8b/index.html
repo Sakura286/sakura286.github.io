@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-CN" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>认识 ELF（一） | 你无法体验苹果本身</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="preload" as="font" crossorigin="anonymous" href="/font/Bender.ttf"><link rel="preload" as="font" crossorigin="anonymous" href="/font/BenderLight.ttf"><link rel="preload" as="font" crossorigin="anonymous" href="/font/JetBrainsMono-Regular.woff2"><link rel="stylesheet" href="/css/arknights.css"><style>@font-face {
+  font-family: Bender;
+  src: local('Bender'), url("/font/Bender.ttf"), url("/font/Bender.otf");
+}
+@font-face {
+  font-family: BenderLight;
+  src: local('BenderLight'), url("/font/BenderLight.ttf");
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}
+</style><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"Enter here","blurHolder":"Search","noResult":"Data \"$0\" not found"},"code":{"codeInfo":"$0 - $1 lines","copy":"copy"}}</script><link type="text/css" rel="stylesheet" href="/lib/encrypt/hbe.style.css"><script src="//unpkg.com/mermaid@10.5.0/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><script>if (window.localStorage.getItem('theme-mode') === 'light')
+ document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark')
+ document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.woff2") format('woff2');
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+ --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+ --light-background: url('/img/bk.jpg');
+ --theme-encrypt-confirm: 'confirm'
+}</style><script defer src="/js/arknights.js"></script><script defer src="/js/search.js"></script><script defer type="module">import mermaid from '//unpkg.com/mermaid@10.5.0/dist/mermaid.esm.mjs';
+window.mermaid = mermaid;
+code.paintMermaid();
+</script><script async src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script async src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script async src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script async src="/lib/encrypt/hbe.js"></script><script async src="/js/pjax.js"></script><script class="pjax-js">reset= () => {document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js','data-pjax','.busuanzi'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script><script class="pjax-js">reset= () => {document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="你无法体验苹果本身" type="application/atom+xml">
+</head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><nav><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="Search" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup" tabindex="0"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li></ol></nav></header><article><div id="post-bg"><div id="post-title"><h1>认识 ELF（一）</h1><div id="post-info"><span>First Post: <div class="control"><time datetime="2024-05-05T00:01:55.000Z" id="date"> 2024-05-05</time></div></span><br><span>Last Update: <div class="control"><time datetime="2025-09-18T02:39:42.289Z" id="updated"> 2025-09-18</time></div></span></div></div><hr><div id="post-content"><p>本文的目的是通过计算一个 ELF 文件各部分的<strong>大小</strong>来认识 ELF 文件的组成。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><p class='item-img' data-src='/../images/2802c1b8-a901-430c-87d1-3f8b4a481953.png'><img src="/../images/2802c1b8-a901-430c-87d1-3f8b4a481953.png" alt="链接器的两种视角"></p>
+<p>ELF 文件的主要部分，</p>
+<ul>
+<li>从链接器的视角来看由<code>section</code>组成，每个<code>section</code>的信息记录在 ELF 文件尾部的<code>section header table</code>部分</li>
+<li>从加载器的视角（即执行视角）来看由<code>segment</code>组成，每个<code>segment</code>的信息记录在 ELF 文件头部的<code>program header table</code>部分</li>
+</ul>
+<h2 id="ELF-文件大小计算"><a href="#ELF-文件大小计算" class="headerlink" title="ELF 文件大小计算"></a>ELF 文件大小计算</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>使用<code>gcc -o test test.c</code>编译上面的 c 文件，并用<code>ls -l</code>查看文件的大小（在作者的电脑上是 15832 字节）</p>
+<p>使用<code>readelf -h test</code>可得知 ELF header 的相关信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs plain">ELF Header:<br>  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 <br>  Class:                             ELF64<br>  Data:                              2&#x27;s complement, little endian<br>  Version:                           1 (current)<br>  OS/ABI:                            UNIX - System V<br>  ABI Version:                       0<br>  Type:                              DYN (Position-Independent Executable file)<br>  Machine:                           Advanced Micro Devices X86-64<br>  Version:                           0x1<br>  Entry point address:               0x1040<br>  Start of program headers:          64 (bytes into file)<br>  Start of section headers:          13912 (bytes into file)<br>  Flags:                             0x0<br>  Size of this header:               64 (bytes)<br>  Size of program headers:           56 (bytes)<br>  Number of program headers:         13<br>  Size of section headers:           64 (bytes)<br>  Number of section headers:         30<br>  Section header string table index: 29<br></code></pre></td></tr></table></figure>
+
+<p>本文只关注<strong>大小</strong>，由<code>Size of this header</code>可以得知<code>ELF header</code>的大小是 64 字节</p>
+<p>program header table 应该紧随 ELF header 之后，那么其相对于 ELF 文件起始处的偏移应该也是 64 字节，<code>Start of program headers</code>一项可以验证此结论</p>
+<p>program header table 里存放了多条 program header，每条 program header 都存放着每个<code>segment</code>的元数据。在本例中，由<code>Size of program headers</code>与<code>Number of program headers</code>可知 program header table 一共有 13 条，每一条的大小是 56 字节。即整个表的大小为 13 * 56 &#x3D; 728 字节。</p>
+<p><code>sections</code>部分，或<code>segments</code>部分，应当紧随 program header table 之后，所以推测其起始偏移应该是 64 + 728 &#x3D; 792 字节处</p>
+<p>使用<code>readelf -S -W test</code>命令，获得如下内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs plain">Section Headers:<br>  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al<br>  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0<br>  [ 1] .interp           PROGBITS        0000000000000318 000318 00001c 00   A  0   0  1<br>  [ 2] .note.gnu.property NOTE           0000000000000338 000338 000020 00   A  0   0  8<br>  [ 3] .note.gnu.build-id NOTE           0000000000000358 000358 000024 00   A  0   0  4<br>  [ 4] .note.ABI-tag     NOTE            000000000000037c 00037c 000020 00   A  0   0  4<br>  [ 5] .gnu.hash         GNU_HASH        00000000000003a0 0003a0 000024 00   A  6   0  8<br>  [ 6] .dynsym           DYNSYM          00000000000003c8 0003c8 000090 18   A  7   1  8<br>  [ 7] .dynstr           STRTAB          0000000000000458 000458 000088 00   A  0   0  1<br>  [ 8] .gnu.version      VERSYM          00000000000004e0 0004e0 00000c 02   A  6   0  2<br>  [ 9] .gnu.version_r    VERNEED         00000000000004f0 0004f0 000030 00   A  7   1  8<br>  [10] .rela.dyn         RELA            0000000000000520 000520 0000c0 18   A  6   0  8<br>  [11] .init             PROGBITS        0000000000001000 001000 000017 00  AX  0   0  4<br>  [12] .plt              PROGBITS        0000000000001020 001020 000010 10  AX  0   0 16<br>  [13] .plt.got          PROGBITS        0000000000001030 001030 000008 08  AX  0   0  8<br>  [14] .text             PROGBITS        0000000000001040 001040 0000f4 00  AX  0   0 16<br>  [15] .fini             PROGBITS        0000000000001134 001134 000009 00  AX  0   0  4<br>  [16] .rodata           PROGBITS        0000000000002000 002000 000004 04  AM  0   0  4<br>  [17] .eh_frame_hdr     PROGBITS        0000000000002004 002004 00002c 00   A  0   0  4<br>  [18] .eh_frame         PROGBITS        0000000000002030 002030 0000ac 00   A  0   0  8<br>  [19] .init_array       INIT_ARRAY      0000000000003e00 002e00 000008 08  WA  0   0  8<br>  [20] .fini_array       FINI_ARRAY      0000000000003e08 002e08 000008 08  WA  0   0  8<br>  [21] .dynamic          DYNAMIC         0000000000003e10 002e10 0001b0 10  WA  7   0  8<br>  [22] .got              PROGBITS        0000000000003fc0 002fc0 000028 08  WA  0   0  8<br>  [23] .got.plt          PROGBITS        0000000000003fe8 002fe8 000018 08  WA  0   0  8<br>  [24] .data             PROGBITS        0000000000004000 003000 000010 00  WA  0   0  8<br>  [25] .bss              NOBITS          0000000000004010 003010 000008 00  WA  0   0  1<br>  [26] .comment          PROGBITS        0000000000000000 003010 00001f 01  MS  0   0  1<br>  [27] .symtab           SYMTAB          0000000000000000 003030 000348 18     28  18  8<br>  [28] .strtab           STRTAB          0000000000000000 003378 0001c9 00      0   0  1<br>  [29] .shstrtab         STRTAB          0000000000000000 003541 000110 00      0   0  1<br></code></pre></td></tr></table></figure>
+
+<p>重点看 Off(set) 与 Size 两列。offset 是该 section 相对于整个 ELF 文件起始的偏移，第一个有实质内容的 section 是<code>.interp</code>，其起始偏移为 0x318，正好对应前文的 792 字节。</p>
+<p>随后，看最后的 section <code>.shstrtab</code>，其起始偏移为 0x3541，大小为 0x110，即所有 sections 的结束偏移为 0x3541 + 0x110 &#x3D; 0x3651，即 13905 字节。</p>
+<p>section header table 应当紧随 sections 之后，即其起始偏移为 13905 字节。由<code>Number of section headers</code>与<code>Size of section headers</code>可知，表中有 30 条 section header，每条的大小是 64 字节，所以表的大小是 30 * 64 &#x3D; 1920 字节。那么整个文件的大小为 13905 + 1920 &#x3D; 15825 字节。</p>
+<p>我们验证一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ <span class="hljs-built_in">du</span> -b <span class="hljs-built_in">test</span><br>15832   <span class="hljs-built_in">test</span><br></code></pre></td></tr></table></figure>
+
+<p>咦，实际的大小是 15832 字节。问题在于 ELF 文件的每一部分都是 8 字节对齐的（<strong>TODO</strong>：在哪定的？），所以，虽然 sections 的结束偏移为 13905 字节，但 section header table 应当对齐 8 字节，即应当从 13912 偏移处开始，从 ELF header 中的<code>Start of section headers</code>可以验证此结论。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/363488456">elf 文件格式 -1- 可执行文件 - 黄导 - 知乎</a></li>
+</ul>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2024-12-20/231f6c89be0f/">← Next LibreOffice 对自定义图形的处理</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2024-04-04/65ec9d8196b8/">搭建 apt 仓库 Prev →</a></div></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="To Top" style="opacity: 0; display: none;">∧ </a><a class="i-index" id="to-index" href="#toc-div" title="To Catalog">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="Change Theme"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo" style="margin:0;border-radius:0;"></a><h1 id="Dr"><a href="/">Sakura286</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>Catalog</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ELF-%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F%E8%AE%A1%E7%AE%97"><span class="toc-number">2.</span> <span class="toc-text">ELF 文件大小计算</span></a></li></ol></div></div><footer><nobr>Published with <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> Theme <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr> by <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside></main><canvas id="canvas-dust"></canvas></body></html>
