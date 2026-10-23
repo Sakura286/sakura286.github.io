@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-cn" data-scheme-default="auto" data-zoom>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROCm Debian 支持现状 / 你无法体验苹果本身</title>
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="本调查于 2025 年 7 月 31 日 今天在 RISC-V 平台上基于 ROCm 6.4.2 后端，把 Deepseek 70B Q4 跑通了，而且很流畅，有点小高兴。 可行性验证了，是时候考虑上游化的事情了。 想从下面几个方面着手调查  Debian ROCm 的版本 Debian ROCm 组的活跃情况 Debian ROCm 对其他架构的支持情况  基础信息ROCm Team 介绍 ht">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ROCm Debian 支持现状">
+<meta property="og:url" content="https://sakura286.github.io/2025-07-31/55f7973fbcf3/index.html">
+<meta property="og:site_name" content="你无法体验苹果本身">
+<meta property="og:description" content="本调查于 2025 年 7 月 31 日 今天在 RISC-V 平台上基于 ROCm 6.4.2 后端，把 Deepseek 70B Q4 跑通了，而且很流畅，有点小高兴。 可行性验证了，是时候考虑上游化的事情了。 想从下面几个方面着手调查  Debian ROCm 的版本 Debian ROCm 组的活跃情况 Debian ROCm 对其他架构的支持情况  基础信息ROCm Team 介绍 ht">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-07-31T15:15:50.000Z">
+<meta property="article:modified_time" content="2025-07-31T15:15:50.000Z">
+<meta property="article:author" content="Sakura286">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/atom+xml" href="/atom.xml" title="你无法体验苹果本身">
+<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/tty.css">
+<script>
+  (function () {
+    var root = document.documentElement, saved;
+    try { saved = localStorage.getItem('tty-scheme'); } catch (e) {}
+    var scheme = saved || root.getAttribute('data-scheme-default');
+    if (scheme === 'dark' || scheme === 'light') root.setAttribute('data-scheme', scheme);
+  })();
+</script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body data-copy="复制" data-copied="已复制">
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="topbar wrap" id="top">
+  <a class="logo" href="/" aria-label="你无法体验苹果本身"><svg class="px px-logo" viewBox="0 0 12 11" shape-rendering="crispEdges" aria-hidden="true"><path d="M7 0h2v1h-2zM6 1h2v1h-2zM6 2h1v1h-1zM2 3h3v1h-3zM7 3h3v1h-3zM1 4h10v1h-10zM0 5h2v1h-2zM3 5h9v1h-9zM0 6h12v1h-12zM0 7h12v1h-12zM1 8h10v1h-10zM1 9h10v1h-10zM2 10h3v1h-3zM7 10h3v1h-3z"/></svg>
+</a>
+  <nav class="topnav">
+    
+    <a href="/" data-key="h"><kbd>[H]</kbd> 首页</a>
+    
+    <a href="/archives/" data-key="a"><kbd>[A]</kbd> 归档</a>
+    
+    <a href="/tags/" data-key="t"><kbd>[T]</kbd> 标签</a>
+    
+    
+    <button type="button" class="js-search" data-key="s"><kbd>[S]</kbd> 搜索</button>
+    
+  </nav>
+  <div class="topbar-end">
+    <button type="button" class="scheme-btn js-scheme" aria-label="切换深浅色" title="切换深浅色">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>
+    </button>
+    <a class="btn-solid" href="/atom.xml">RSS</a>
+  </div>
+</header>
+
+<main id="main">
+<article class="post">
+  <header class="wrap split post-head">
+    <div></div>
+    <div>
+      <div class="post-icon"><svg class="px px-tile" viewBox="-3 -3 20 20" shape-rendering="crispEdges" aria-hidden="true"><rect x="-3" y="-3" width="20" height="20"/><path d="M2 3h10v1h-10zM1 4h1v1h-1zM6 4h2v1h-2zM12 4h1v1h-1zM1 5h12v1h-12zM1 6h1v1h-1zM12 6h1v1h-1zM1 7h1v1h-1zM5 7h4v1h-4zM12 7h1v1h-1zM1 8h1v1h-1zM12 8h1v1h-1zM1 9h1v1h-1zM12 9h1v1h-1zM1 10h12v1h-12z"/></svg></div>
+      <h1 class="post-title">ROCm Debian 支持现状</h1>
+      
+      <dl class="meta">
+        <div><dt>作者</dt><dd class="tl">Sakura286</dd></div>
+        
+        <div><dt>发布于</dt><dd class="tl"><time datetime="2025-07-31T15:15:50.000Z">2025-07-31</time></dd></div>
+        
+        
+        <div><dt>阅读</dt><dd class="tl" id="vercount_value_page_pv">-</dd></div>
+        
+      </dl>
+    </div>
+  </header>
+  <div class="rule"></div>
+  <div class="wrap split post-main">
+    <aside class="post-aside">
+      <div class="aside-in">
+        <p class="aside-title" hidden>ROCm Debian 支持现状</p>
+        
+        <details class="tree" open>
+          <summary class="label">目录</summary>
+          <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E4%BF%A1%E6%81%AF"><span class="toc-text">基础信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%89%88%E6%9C%AC"><span class="toc-text">1. 版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-ROCm-%E7%A4%BE%E5%8C%BA%E6%B4%BB%E8%B7%83%E6%83%85%E5%86%B5"><span class="toc-text">2. ROCm 社区活跃情况</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AF%B9%E5%85%B6%E4%BB%96%E6%9E%B6%E6%9E%84%E7%9A%84%E6%94%AF%E6%8C%81"><span class="toc-text">3. 对其他架构的支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-text">结论</span></a></li></ol>
+        </details>
+        
+        <div class="progress" aria-hidden="true"><span class="bar"><i></i></span><span class="pct">00%</span></div>
+        <p class="label">2 分钟阅读</p>
+        <div class="share">
+          <p class="label">分享</p>
+          <ul class="tree-list">
+            <li><button type="button" class="js-copy-link" data-done="已复制">复制链接</button></li>
+            <li><a href="#top">回到顶部</a></li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+    <div class="post-body">
+      <div class="prose"><p>本调查于 2025 年 7 月 31 日</p>
+<p>今天在 RISC-V 平台上基于 ROCm 6.4.2 后端，把 Deepseek 70B Q4 跑通了，而且很流畅，有点小高兴。</p>
+<p>可行性验证了，是时候考虑上游化的事情了。</p>
+<p>想从下面几个方面着手调查</p>
+<ol>
+<li>Debian ROCm 的版本</li>
+<li>Debian ROCm 组的活跃情况</li>
+<li>Debian ROCm 对其他架构的支持情况</li>
+</ol>
+<h2 id="基础信息"><a href="#基础信息" class="headerlink" title="基础信息"></a>基础信息</h2><p>ROCm Team 介绍 <a target="_blank" rel="noopener" href="https://wiki.debian.org/Teams/ROCm">https://wiki.debian.org/Teams/ROCm</a><br>源码仓库 <a target="_blank" rel="noopener" href="https://salsa.debian.org/rocm-team">https://salsa.debian.org/rocm-team</a><br>邮件列表 <a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/">https://lists.debian.org/debian-ai/</a></p>
+<h2 id="1-版本"><a href="#1-版本" class="headerlink" title="1. 版本"></a>1. 版本</h2><p>以 llama.cpp 所依赖的最高层级的包 hipblas 开始捋，根据<a target="_blank" rel="noopener" href="https://qa.debian.org/developer.php?email=debian-ai@lists.debian.org">Packages overview for Debian ROCm Team</a></p>
+<p>hipblas     5.5.1<br>rocsolver   5.5.1<br>rocblas     5.5.1 (experimental: 6.4.1)<br>rocsparse   5.7,1 (experimental: 6.4.1)<br>rocprim     5.7.1 (experimental: 6.4.1)<br>roctracer   5.7.1 (experimental: 6.4.1)</p>
+<p>smi-lib     5.7.1 (experimental: 6.4.1)<br>rocm-hipamd 5.7.1 (experimental: 6.1.5)<br>rocminfo    6.1.2 (experimental: 6.4.1)<br>rocm-llvm   n&#x2F;a   (experimental: 6.1.2)</p>
+<p>附：上游的<br>5.5.1 在 2023.05 发布<br>5.7.1 在 2023.10 发布<br>6.1.2 在 2024.07 发布<br>6.4.1 在 2025.05 发布</p>
+<p>可以看出，除了工具链&#x2F;HIP库略老（6.1.2）之外，重要的数学库已经在 experimental 里更新到了最新的 6.4.1</p>
+<p>或许可以看看 rocm-llvm 与 rocm-hipamd 的更新情况，以及一些不关键的包的升级情况</p>
+<h2 id="2-ROCm-社区活跃情况"><a href="#2-ROCm-社区活跃情况" class="headerlink" title="2. ROCm 社区活跃情况"></a>2. ROCm 社区活跃情况</h2><p>目前有两位活跃的维护者<a target="_blank" rel="noopener" href="https://salsa.debian.org/cgmb">Cordell Bloor</a>与<a target="_blank" rel="noopener" href="https://salsa.debian.org/ckk">Christian Kastner</a></p>
+<p>最近（三个月内）有其他的代码贡献者，例如<a target="_blank" rel="noopener" href="https://salsa.debian.org/kenhys">Kentaro Hayashi</a>，<a target="_blank" rel="noopener" href="https://salsa.debian.org/ajqlee">Andrew Lee (李健秋) </a>，<a target="_blank" rel="noopener" href="https://salsa.debian.org/bayle">Christian Bayle</a>，<a target="_blank" rel="noopener" href="https://salsa.debian.org/kapouer">Jérémy Lal</a>‘。邮件列表里活跃的还有 M. Zhou，</p>
+<p>最近两个月，Cordell Bloor 开始<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2025/05/msg00113.html">搞双周会</a>，但是最近因为他<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2025/07/msg00052.html">休假</a>，所以跳过了一次。目前双周会的链接并未公开，需要给 Bloor 发邮件去要，地址<code>cgmb@slerp.xyz</code></p>
+<h2 id="3-对其他架构的支持"><a href="#3-对其他架构的支持" class="headerlink" title="3. 对其他架构的支持"></a>3. 对其他架构的支持</h2><p>AMD 上游并未提到对特定 CPU 架构的需求，只需该 CPU 支持 PCIe atomic 即可</p>
+<p>Debian 这边支持 amd64 arm64 ppc64el</p>
+<p>2024.12，Cordell Bloor 看到 <a target="_blank" rel="noopener" href="https://www.phoronix.com/news/AMDKFD-Compute-POWERPC">POWER 系统支持 ROCm</a>，打算<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2024/12/msg00026.html">搞 arm64 和 ppc64</a></p>
+<p>2025.02，Raptor Computing 给 Debian ROCm 组<a href="(https://lists.debian.org/debian-ai/2025/02/msg00250.html)">提供了一台 ppc64 机器</a>，但是驱动有bug；有人建议<a target="_blank" rel="noopener" href="https://lists.debian.org/debian-ai/2025/02/msg00251.html">用树莓派5来做 arm64 的验证</a></p>
+<p>2025.04，</p>
+<p>2025.05</p>
+<p>2025.06</p>
+<p>2025.07</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2></div>
+      
+      <nav class="post-nav">
+        
+        <a href="/2025-09-17/9f72b4ef6e03/" rel="prev"><span class="label">← 较新</span><span>Debian 打包脚本预处理</span></a>
+        
+        
+        <a href="/2025-06-13/a9cedd872168/" rel="next" class="post-nav-next"><span class="label">较早 →</span><span>十万个为什么</span></a>
+        
+      </nav>
+      
+    </div>
+  </div>
+</article>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-in">
+    <p class="footer-l">
+      <span>© 2022–2026 Sakura286</span>
+      <span>Hexo · tty</span>
+    </p>
+    <p class="footer-r">
+      <span>访问 <span id="vercount_value_site_pv">-</span></span>
+      <span>访客 <span id="vercount_value_site_uv">-</span></span>
+      <span>构建于 2026-10-23 11:45 UTC</span>
+      <a href="#top">顶部 ↑</a>
+    </p>
+  </div>
+</footer>
+
+<dialog class="search" id="search" aria-label="搜索"
+  data-src="/search.json"
+  data-loading="加载中…" data-empty="没有找到" data-failed="索引加载失败">
+  <div class="search-input">
+    <span class="prompt" aria-hidden="true">&gt;</span>
+    <input type="search" placeholder="搜索文章" autocomplete="off" spellcheck="false" aria-label="搜索文章">
+    <kbd>Esc</kbd>
+  </div>
+  <ol class="search-results" role="listbox"></ol>
+  <p class="search-foot">↑↓ 选择 · Enter 打开 · Esc 关闭</p>
+</dialog>
+
+<script src="/js/tty.js" defer></script>
+<script src="https://vercount.one/js" defer></script>
+</body>
+</html>
